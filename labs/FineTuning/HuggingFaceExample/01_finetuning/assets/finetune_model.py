@@ -57,7 +57,7 @@ def training_function(script_args, training_args):
     model = NeuronModelForCausalLM.from_pretrained(
         script_args.model_id,
         trn_config,
-        torch_dtype=dtype,
+        dtype=dtype,
         # Use FlashAttention2 for better performance and to be able to use larger sequence lengths.
         use_flash_attention_2=False, #Because we are training a sequence lower than 2K for the workshop
     )
@@ -82,7 +82,7 @@ def training_function(script_args, training_args):
     args = training_args.to_dict()
 
     sft_config = NeuronSFTConfig(
-        max_seq_length=1024,
+        max_length=1024,
         packing=True,
         **args,
         dataset_kwargs={
@@ -95,9 +95,8 @@ def training_function(script_args, training_args):
         args=sft_config,
         model=model,
         peft_config=config,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         train_dataset=train_dataset,
-        eval_dataset=eval_dataset,
     )
 
     # Start training
